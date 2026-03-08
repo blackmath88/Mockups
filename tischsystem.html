@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tischsystem Gartensaal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400&family=Lora:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --oak-light: #d4a05e;
+  --oak-mid:   #b07835;
+  --oak-dark:  #7a4f1a;
+  --bark:      #4a2e0e;
+  --charcoal:  #1c1510;
+  --steel:     #6a737d;
+  --cream:     #f8f2e8;
+  --sand:      #efe5d2;
+  --parchment: #faf6ee;
+  --white:     #ffffff;
+}
+html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Lora', serif;
+  background: var(--parchment);
+  color: var(--charcoal);
+  overflow-x: hidden;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--oak-mid);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.tag::before { content: ''; display: block; width: 28px; height: 1px; background: var(--oak-mid); flex-shrink: 0; }
+
+/* HERO */
+.hero {
+  background: var(--charcoal);
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg { position: absolute; inset: 0; z-index: 0; }
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, var(--charcoal) 0%, rgba(28,21,16,0.5) 40%, rgba(28,21,16,0.1) 68%, rgba(28,21,16,0.72) 100%);
+  z-index: 2;
+}
+.hero-content {
+  position: relative; z-index: 3;
+  padding: 0 24px 56px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 13vw, 72px);
+  line-height: 1.05;
+  color: var(--cream);
+  font-weight: 400;
+}
+.hero-title em { font-style: italic; color: var(--oak-light); display: block; }
+.hero-sub {
+  font-size: 16px; color: rgba(248,242,232,0.6);
+  font-weight: 300; font-style: italic;
+  max-width: 300px; line-height: 1.65;
+}
+.hero-meta { display: flex; gap: 28px; padding-top: 6px; }
+.hero-stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px; color: var(--oak-light); line-height: 1;
+}
+.hero-stat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.2em;
+  color: rgba(248,242,232,0.4); text-transform: uppercase; margin-top: 4px;
+}
+.hero-scroll {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  letter-spacing: 0.2em; color: rgba(248,242,232,0.3);
+  text-transform: uppercase; margin-top: 12px;
+}
+.scroll-line { width: 32px; height: 1px; background: rgba(248,242,232,0.2); }
+
+/* SECTIONS */
+section { padding: 60px 24px; }
+.section-head { margin-bottom: 32px; }
+.section-head .tag { margin-bottom: 14px; }
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(27px, 7.5vw, 44px);
+  font-weight: 400; line-height: 1.15; color: var(--bark);
+}
+.section-title em { font-style: italic; color: var(--oak-mid); }
+
+/* BOARDS */
+.boards-section { background: var(--sand); }
+.board-intro {
+  font-size: 15px; color: var(--steel);
+  font-style: italic; line-height: 1.7; margin-bottom: 36px;
+  padding-left: 14px; border-left: 2px solid var(--oak-light);
+}
+.board-stack { display: flex; flex-direction: column; gap: 5px; margin-bottom: 36px; }
+.board-slice {
+  display: flex; align-items: stretch;
+  border-radius: 3px; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(74,46,14,0.18);
+  min-height: 54px; cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.board-slice:active { transform: scale(0.988); }
+.board-end {
+  width: 20px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  gap: 3px; padding: 8px 4px;
+}
+.board-end-ring {
+  width: 10px; height: 3px;
+  border-radius: 50%;
+  border: 1px solid rgba(74,46,14,0.3);
+}
+.board-face {
+  flex: 1; display: flex; align-items: center;
+  padding: 10px 16px; position: relative; overflow: hidden;
+}
+.b1 .board-face { background: linear-gradient(180deg, #c48448 0%, #b07030 55%, #c07840 100%); }
+.b2 .board-face { background: linear-gradient(180deg, #ba7c3c 0%, #a56826 55%, #b87838 100%); }
+.b3 .board-face { background: linear-gradient(180deg, #cc904e 0%, #b8783a 55%, #ca8c4c 100%); }
+.b4 .board-face { background: linear-gradient(180deg, #b6763e 0%, #a2640c 55%, #b47438 100%); }
+.b5 .board-face { background: linear-gradient(180deg, #be7646 0%, #a8662c 55%, #bc743e 100%); }
+.b1 .board-end { background: #7a3e16; }
+.b2 .board-end { background: #6c3410; }
+.b3 .board-end { background: #804616; }
+.b4 .board-end { background: #683008; }
+.b5 .board-end { background: #763e12; }
+.board-grain { position: absolute; inset: 0; pointer-events: none; }
+.board-info {
+  position: relative; z-index: 1;
+  display: flex; justify-content: space-between;
+  align-items: center; width: 100%;
+}
+.board-letter {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-style: italic;
+  color: rgba(26,20,10,0.5); font-weight: 400; line-height: 1;
+}
+.board-right { text-align: right; }
+.board-dim {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; color: rgba(26,20,10,0.45); letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.board-uses { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+.board-use-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(26,20,10,0.11); color: rgba(26,20,10,0.5);
+  padding: 3px 7px; border-radius: 2px;
+}
+
+/* Assembled */
+.assembled-view {
+  background: var(--charcoal);
+  border-radius: 6px; padding: 22px 16px; margin-bottom: 10px;
+}
+.assembled-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(212,160,94,0.45); margin-bottom: 14px; text-align: center;
+}
+.assembled-boards {
+  display: flex; gap: 3px; height: 46px;
+  border-radius: 3px; overflow: hidden;
+  box-shadow: 0 3px 18px rgba(0,0,0,0.4);
+}
+.ab { flex: 1; position: relative; overflow: hidden; }
+.ab-1 { background: linear-gradient(180deg, #c4844a, #a86830); }
+.ab-2 { background: linear-gradient(180deg, #ba7c3c, #9a601e); }
+.ab-3 { background: linear-gradient(180deg, #cc904e, #b07838); }
+.ab-4 { background: linear-gradient(180deg, #b6763e, #a2640c); }
+.ab-5 { background: linear-gradient(180deg, #be7646, #aa6828); }
+.ab-sep { position: absolute; top:0; bottom:0; right:0; width:2px; background: rgba(28,21,16,0.35); }
+.ab-lbl {
+  position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 14px;
+  color: rgba(26,16,4,0.42);
+}
+.assembled-dim {
+  text-align: center; font-family: 'DM Mono', monospace;
+  font-size: 10px; color: rgba(212,160,94,0.38);
+  margin-top: 10px; letter-spacing: 0.1em;
+}
+
+/* Connector detail */
+.connector-detail {
+  background: var(--white); border-radius: 6px;
+  padding: 22px 20px; margin-top: 20px;
+  border: 1px solid rgba(176,120,53,0.14);
+}
+.connector-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--oak-mid); margin-bottom: 14px;
+}
+.connector-row {
+  display: flex; align-items: flex-start;
+  gap: 14px; padding: 13px 0;
+  border-bottom: 1px solid rgba(74,46,14,0.07);
+}
+.connector-row:last-child { border-bottom: none; padding-bottom: 0; }
+.connector-icon {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sand); border-radius: 4px;
+}
+.ci-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--oak-dark); margin-bottom: 4px;
+}
+.ci-desc { font-size: 14px; color: var(--steel); font-style: italic; line-height: 1.55; }
+
+/* SCENARIOS */
+.scenarios-section { background: var(--charcoal); }
+.scenarios-section .section-title { color: var(--cream); }
+.scenarios-section .section-title em { color: var(--oak-light); }
+.scenarios-section .tag { color: var(--oak-light); }
+.scenarios-section .tag::before { background: var(--oak-light); }
+.scenario-cards { display: flex; flex-direction: column; gap: 3px; }
+.scenario-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(212,160,94,0.1);
+  border-radius: 4px; overflow: hidden;
+}
+.scenario-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px; cursor: pointer; gap: 16px;
+}
+.sc-left { display: flex; align-items: center; gap: 14px; }
+.sc-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px; font-style: italic;
+  color: rgba(212,160,94,0.22); line-height: 1;
+  flex-shrink: 0; width: 34px;
+}
+.sc-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; color: var(--cream); font-weight: 400;
+}
+.sc-arrow {
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: transform 0.3s ease;
+  color: rgba(212,160,94,0.45);
+}
+.scenario-body { max-height: 0; overflow: hidden; transition: max-height 0.45s ease; }
+.scenario-body.open { max-height: 520px; }
+.scenario-card.open .sc-arrow { transform: rotate(180deg); }
+.sc-inner {
+  padding: 0 20px 22px;
+  border-top: 1px solid rgba(212,160,94,0.08);
+}
+.sc-diag-wrap {
+  margin: 18px 0;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px; padding: 14px;
+}
+.sc-config {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  background: rgba(212,160,94,0.1); color: var(--oak-light);
+  padding: 6px 12px; border-radius: 2px; margin-bottom: 12px;
+}
+.sc-desc { font-size: 15px; color: rgba(248,242,232,0.52); font-style: italic; line-height: 1.7; }
+
+/* MATERIAL */
+.material-section { background: var(--cream); }
+.material-cards { display: flex; flex-direction: column; gap: 14px; }
+.mat-card {
+  background: var(--white); border-radius: 6px;
+  padding: 20px 18px; border-left: 3px solid var(--oak-light);
+  box-shadow: 0 2px 10px rgba(74,46,14,0.06);
+}
+.mat-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--oak-mid); margin-bottom: 6px;
+}
+.mat-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; color: var(--bark); font-weight: 400; margin-bottom: 7px;
+}
+.mat-desc { font-size: 14px; color: var(--steel); font-style: italic; line-height: 1.65; }
+
+/* VORTEILE */
+.vorteile-section { background: var(--sand); }
+.vorteile-list { display: flex; flex-direction: column; }
+.vorteil-row {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 0; border-bottom: 1px solid rgba(176,120,53,0.13);
+}
+.vorteil-row:last-child { border-bottom: none; }
+.vorteil-icon-wrap {
+  width: 42px; height: 42px; flex-shrink: 0;
+  background: var(--white); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(74,46,14,0.09);
+}
+.vorteil-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; color: var(--bark);
+  font-weight: 400; line-height: 1.3;
+}
+
+/* CTA */
+.cta-section {
+  background: var(--bark);
+  text-align: center;
+  padding: 70px 24px 80px;
+  position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.cta-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(212,160,94,0.65); display: block; margin-bottom: 18px;
+  position: relative; z-index: 1;
+}
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(33px, 10vw, 52px); color: var(--cream);
+  font-weight: 400; line-height: 1.1; margin-bottom: 14px;
+  position: relative; z-index: 1;
+}
+.cta-title em { font-style: italic; color: var(--oak-light); }
+.cta-sub {
+  font-size: 16px; color: rgba(248,242,232,0.45);
+  font-style: italic; margin-bottom: 36px;
+  position: relative; z-index: 1;
+}
+.cta-steps {
+  display: flex; flex-direction: column; gap: 10px;
+  max-width: 320px; margin: 0 auto 36px;
+  position: relative; z-index: 1; text-align: left;
+}
+.cta-step {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: rgba(248,242,232,0.06);
+  border-radius: 4px; padding: 14px 16px;
+}
+.cta-step-n {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 20px;
+  color: var(--oak-light); opacity: 0.55;
+  line-height: 1; flex-shrink: 0; width: 18px; padding-top: 1px;
+}
+.cta-step-text {
+  font-size: 14px; color: rgba(248,242,232,0.65);
+  font-style: italic; line-height: 1.5;
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--oak-light); color: var(--charcoal);
+  padding: 16px 32px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  text-decoration: none; border-radius: 3px;
+  position: relative; z-index: 1;
+  transition: background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.cta-btn:active { background: var(--oak-mid); }
+.footer-note {
+  margin-top: 44px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: rgba(248,242,232,0.18); text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-content > * { animation: fadeUp 0.7s ease both; }
+.hero-content > *:nth-child(1) { animation-delay: 0.1s; }
+.hero-content > *:nth-child(2) { animation-delay: 0.24s; }
+.hero-content > *:nth-child(3) { animation-delay: 0.38s; }
+.hero-content > *:nth-child(4) { animation-delay: 0.52s; }
+.hero-content > *:nth-child(5) { animation-delay: 0.66s; }
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Desktop enhancements */
+@media (min-width: 640px) {
+  .hero-title { font-size: 68px; }
+  .board-stack { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .assembled-view { max-width: 680px; margin-left: auto; margin-right: auto; }
+  .material-cards { display: grid; grid-template-columns: 1fr 1fr; }
+  .vorteile-list { max-width: 540px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg">
+    <svg width="100%" height="100%" viewBox="0 0 400 740" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="wn">
+          <feTurbulence type="fractalNoise" baseFrequency="0.019 0.0045" numOctaves="6" seed="23" stitchTiles="stitch" result="n"/>
+          <feColorMatrix type="matrix" values="0.32 0.1 0 0 0.25  0.14 0.05 0 0 0.10  0 0 0 0 0.02  0 0 0 1 0" in="n" result="c"/>
+          <feBlend in="SourceGraphic" in2="c" mode="multiply"/>
+        </filter>
+        <linearGradient id="pg1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#b87038"/><stop offset="55%" stop-color="#c8884e"/><stop offset="100%" stop-color="#a86020"/>
+        </linearGradient>
+        <linearGradient id="pg2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a86030"/><stop offset="55%" stop-color="#bc7a42"/><stop offset="100%" stop-color="#9a5018"/>
+        </linearGradient>
+        <linearGradient id="pg3" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#c07848"/><stop offset="55%" stop-color="#d49060"/><stop offset="100%" stop-color="#b06830"/>
+        </linearGradient>
+        <linearGradient id="pg4" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#9a5820"/><stop offset="55%" stop-color="#b07038"/><stop offset="100%" stop-color="#8a4810"/>
+        </linearGradient>
+        <linearGradient id="pg5" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#b26030"/><stop offset="55%" stop-color="#c87848"/><stop offset="100%" stop-color="#9c5020"/>
+        </linearGradient>
+      </defs>
+      <rect width="400" height="740" fill="#1c1510"/>
+      <!-- Plank 1 -->
+      <rect x="0" y="350" width="400" height="72" fill="url(#pg1)" filter="url(#wn)"/>
+      <g stroke="#4a2208" stroke-width="0.7" fill="none" opacity="0.22">
+        <path d="M0,362 C80,359 200,365 400,361"/>
+        <path d="M0,374 C65,371 180,377 400,373"/>
+        <path d="M0,387 C95,383 220,389 400,385"/>
+        <path d="M0,400 C70,397 190,403 400,399"/>
+        <path d="M0,413 C85,410 210,416 400,412"/>
+      </g>
+      <rect x="0" y="418" width="400" height="4" fill="rgba(18,10,3,0.45)"/>
+      <!-- Plank 2 -->
+      <rect x="0" y="422" width="400" height="70" fill="url(#pg2)" filter="url(#wn)"/>
+      <g stroke="#4a2208" stroke-width="0.7" fill="none" opacity="0.18">
+        <path d="M0,435 C110,431 250,437 400,433"/>
+        <path d="M0,449 C80,445 215,452 400,447"/>
+        <path d="M0,463 C100,459 240,465 400,461"/>
+        <path d="M0,477 C70,473 200,480 400,475"/>
+      </g>
+      <!-- knot plank 2 -->
+      <ellipse cx="255" cy="457" rx="16" ry="12" fill="none" stroke="#3a1803" stroke-width="1.5" opacity="0.22"/>
+      <ellipse cx="255" cy="457" rx="8" ry="6" fill="none" stroke="#3a1803" stroke-width="1" opacity="0.18"/>
+      <rect x="0" y="488" width="400" height="4" fill="rgba(18,10,3,0.45)"/>
+      <!-- Plank 3 -->
+      <rect x="0" y="492" width="400" height="72" fill="url(#pg3)" filter="url(#wn)"/>
+      <g stroke="#4a2208" stroke-width="0.7" fill="none" opacity="0.2">
+        <path d="M0,505 C130,501 280,507 400,503"/>
+        <path d="M0,519 C105,515 255,521 400,517"/>
+        <path d="M0,533 C80,529 225,536 400,531"/>
+        <path d="M0,547 C120,543 270,549 400,545"/>
+        <path d="M0,559 C90,555 240,562 400,557"/>
+      </g>
+      <rect x="0" y="560" width="400" height="4" fill="rgba(18,10,3,0.45)"/>
+      <!-- Plank 4 -->
+      <rect x="0" y="564" width="400" height="70" fill="url(#pg4)" filter="url(#wn)"/>
+      <g stroke="#4a2208" stroke-width="0.7" fill="none" opacity="0.16">
+        <path d="M0,577 C140,573 295,579 400,575"/>
+        <path d="M0,591 C100,587 260,594 400,589"/>
+        <path d="M0,606 C115,602 270,609 400,604"/>
+        <path d="M0,619 C95,615 250,622 400,617"/>
+      </g>
+      <rect x="0" y="630" width="400" height="4" fill="rgba(18,10,3,0.45)"/>
+      <!-- Plank 5 -->
+      <rect x="0" y="634" width="400" height="106" fill="url(#pg5)" filter="url(#wn)"/>
+      <g stroke="#4a2208" stroke-width="0.7" fill="none" opacity="0.18">
+        <path d="M0,648 C85,644 210,650 400,646"/>
+        <path d="M0,662 C110,658 260,665 400,660"/>
+        <path d="M0,677 C75,673 220,680 400,675"/>
+        <path d="M0,692 C100,688 255,695 400,690"/>
+        <path d="M0,706 C90,702 240,709 400,704"/>
+      </g>
+      <ellipse cx="90" cy="670" rx="13" ry="10" fill="none" stroke="#3a1803" stroke-width="1.4" opacity="0.2"/>
+    </svg>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="tag" style="color:var(--oak-light)"><span style="width:28px;height:1px;background:var(--oak-light);display:block;flex-shrink:0"></span>Vorschlag Gartensaal</div>
+    <h1 class="hero-title">Modulares<br><em>Tischsystem</em></h1>
+    <p class="hero-sub">Fünf gesägte Massivholzbretter. Ein flexibles System für jeden Anlass.</p>
+    <div class="hero-meta">
+      <div class="hero-stat">
+        <div class="hero-stat-num">5</div>
+        <div class="hero-stat-label">Module</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">5m</div>
+        <div class="hero-stat-label">Gesamt</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">3cm</div>
+        <div class="hero-stat-label">Stärke</div>
+      </div>
+    </div>
+    <div class="hero-scroll"><div class="scroll-line"></div>Konzept erkunden</div>
+  </div>
+</section>
+
+<!-- BOARDS -->
+<section class="boards-section reveal">
+  <div class="section-head">
+    <div class="tag">Die Bretter</div>
+    <h2 class="section-title">Aus einem Stamm —<br><em>fünf Teile</em></h2>
+  </div>
+  <p class="board-intro">
+    Statt eines 8cm-Slabs: Bretter in 3–4 cm Stärke, gesägt aus einem Stamm. Leichter zu handhaben, günstiger in der Herstellung, und die Maserung jeder Bohle ist einzigartig.
+  </p>
+
+  <div class="board-stack">
+    <div class="board-slice b1">
+      <div class="board-end b1-end">
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+      </div>
+      <div class="board-face">
+        <svg class="board-grain" viewBox="0 0 320 54" preserveAspectRatio="none">
+          <g stroke="rgba(50,20,4,0.17)" stroke-width="0.8" fill="none">
+            <path d="M0,11 C65,9 160,13 320,11"/><path d="M0,24 C85,21 185,26 320,23"/>
+            <path d="M0,37 C55,34 150,39 320,36"/><path d="M0,49 C75,46 170,51 320,48"/>
+          </g>
+        </svg>
+        <div class="board-info">
+          <div class="board-letter">A</div>
+          <div class="board-right">
+            <div class="board-dim">0.9m</div>
+            <div class="board-uses">
+              <span class="board-use-tag">Einzeltisch</span>
+              <span class="board-use-tag">Konferenz</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board-slice b2">
+      <div class="board-end">
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+        <div class="board-end-ring"></div>
+      </div>
+      <div class="board-face">
+        <svg class="board-grain" viewBox="0 0 320 54" preserveAspectRatio="none">
+          <g stroke="rgba(50,20,4,0.15)" stroke-width="0.8" fill="none">
+            <path d="M0,13 C90,10 200,15 320,12"/><path d="M0,27 C70,24 175,29 320,26"/>
+            <path d="M0,41 C55,38 165,43 320,40"/>
+          </g>
+          <ellipse cx="190" cy="27" rx="12" ry="8" stroke="rgba(40,14,2,0.18)" stroke-width="1" fill="none"/>
+        </svg>
+        <div class="board-info">
+          <div class="board-letter">B</div>
+          <div class="board-right">
+            <div class="board-dim">1.0m</div>
+            <div class="board-uses">
+              <span class="board-use-tag">Einzeltisch</span>
+              <span class="board-use-tag">Konferenz</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board-slice b3">
+      <div class="board-end">
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+      </div>
+      <div class="board-face">
+        <svg class="board-grain" viewBox="0 0 320 54" preserveAspectRatio="none">
+          <g stroke="rgba(50,20,4,0.2)" stroke-width="0.8" fill="none">
+            <path d="M0,9 C100,6 220,11 320,8"/><path d="M0,22 C80,18 195,24 320,20"/>
+            <path d="M0,35 C90,31 210,37 320,33"/><path d="M0,48 C65,44 180,50 320,46"/>
+          </g>
+        </svg>
+        <div class="board-info">
+          <div class="board-letter">C</div>
+          <div class="board-right">
+            <div class="board-dim">1.0m</div>
+            <div class="board-uses">
+              <span class="board-use-tag">Gruppe</span>
+              <span class="board-use-tag">Konferenz</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board-slice b4">
+      <div class="board-end">
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+        <div class="board-end-ring"></div>
+      </div>
+      <div class="board-face">
+        <svg class="board-grain" viewBox="0 0 320 54" preserveAspectRatio="none">
+          <g stroke="rgba(50,20,4,0.14)" stroke-width="0.8" fill="none">
+            <path d="M0,15 C120,12 250,17 320,14"/><path d="M0,29 C95,26 225,31 320,28"/>
+            <path d="M0,43 C110,40 240,46 320,42"/>
+          </g>
+        </svg>
+        <div class="board-info">
+          <div class="board-letter">D</div>
+          <div class="board-right">
+            <div class="board-dim">1.1m</div>
+            <div class="board-uses">
+              <span class="board-use-tag">Theke</span>
+              <span class="board-use-tag">Sideboard</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board-slice b5">
+      <div class="board-end">
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+        <div class="board-end-ring"></div><div class="board-end-ring"></div>
+        <div class="board-end-ring"></div>
+      </div>
+      <div class="board-face">
+        <svg class="board-grain" viewBox="0 0 320 54" preserveAspectRatio="none">
+          <g stroke="rgba(50,20,4,0.18)" stroke-width="0.8" fill="none">
+            <path d="M0,10 C85,7 195,12 320,9"/><path d="M0,23 C100,20 215,25 320,22"/>
+            <path d="M0,37 C75,34 185,39 320,36"/><path d="M0,50 C90,47 200,52 320,49"/>
+          </g>
+          <ellipse cx="78" cy="28" rx="10" ry="7" stroke="rgba(40,14,2,0.17)" stroke-width="1" fill="none"/>
+        </svg>
+        <div class="board-info">
+          <div class="board-letter">E</div>
+          <div class="board-right">
+            <div class="board-dim">1.0m</div>
+            <div class="board-uses">
+              <span class="board-use-tag">Präsentation</span>
+              <span class="board-use-tag">Buffet</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="assembled-view">
+    <div class="assembled-label">— alle fünf Module zusammengesetzt —</div>
+    <div class="assembled-boards">
+      <div class="ab ab-1"><div class="ab-sep"></div><span class="ab-lbl">A</span></div>
+      <div class="ab ab-2"><div class="ab-sep"></div><span class="ab-lbl">B</span></div>
+      <div class="ab ab-3"><div class="ab-sep"></div><span class="ab-lbl">C</span></div>
+      <div class="ab ab-4"><div class="ab-sep"></div><span class="ab-lbl">D</span></div>
+      <div class="ab ab-5"><span class="ab-lbl">E</span></div>
+    </div>
+    <div class="assembled-dim">A + B + C + D + E = 5.0 m Konferenztisch</div>
+  </div>
+
+  <div class="connector-detail">
+    <div class="connector-title">Verbindungssystem</div>
+    <div class="connector-row">
+      <div class="connector-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="4" stroke="var(--oak-mid)" stroke-width="1.5"/>
+          <path d="M11 3V7M11 15V19M3 11H7M15 11H19" stroke="var(--oak-mid)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="ci-title">Magnetklammern</div>
+        <div class="ci-desc">Unsichtbar an der Unterseite — Module verbinden sich in Sekunden, kein Werkzeug nötig.</div>
+      </div>
+    </div>
+    <div class="connector-row">
+      <div class="connector-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="9" width="16" height="4" rx="1" stroke="var(--oak-mid)" stroke-width="1.5"/>
+          <path d="M7 9V6M11 9V5M15 9V6M7 13V16M11 13V17M15 13V16" stroke="var(--oak-mid)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="ci-title">Stahlgestell</div>
+        <div class="ci-desc">Flachstahl, mattiert. Jedes Modul steht eigenständig, verbindet sich aber bündig mit dem nächsten.</div>
+      </div>
+    </div>
+    <div class="connector-row">
+      <div class="connector-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M4 18C4 18 7 14 11 14C15 14 18 18 18 18" stroke="var(--oak-mid)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M11 4C11 4 8 7 8 10C8 13 11 14 11 14C11 14 14 13 14 10C14 7 11 4 11 4Z" stroke="var(--oak-mid)" stroke-width="1.5" fill="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="ci-title">Oberfläche</div>
+        <div class="ci-desc">Geölt und gewachst. Schützt das Holz, betont die Maserung, bleibt jederzeit nachbehandelbar.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENARIOS -->
+<section class="scenarios-section reveal" id="szenarien">
+  <div class="section-head">
+    <div class="tag">Szenarien</div>
+    <h2 class="section-title">Drei Grundformen.<br><em>Viele Anlässe.</em></h2>
+  </div>
+
+  <div class="scenario-cards">
+    <div class="scenario-card" id="sc1">
+      <div class="scenario-header" onclick="toggleSc('sc1')">
+        <div class="sc-left">
+          <span class="sc-num">1</span>
+          <span class="sc-name">Konferenz</span>
+        </div>
+        <div class="sc-arrow"><svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 1L8 8L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="scenario-body" id="sc1-body">
+        <div class="sc-inner">
+          <span class="sc-config">A + B + C + D + E = 5m</span>
+          <div class="sc-diag-wrap">
+            <svg width="100%" viewBox="0 0 300 68" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="24" width="284" height="20" rx="2" fill="rgba(200,140,80,0.55)" stroke="rgba(200,140,80,0.7)" stroke-width="1"/>
+              <line x1="64" y1="24" x2="64" y2="44" stroke="rgba(28,21,16,0.35)" stroke-width="1" stroke-dasharray="2,2"/>
+              <line x1="120" y1="24" x2="120" y2="44" stroke="rgba(28,21,16,0.35)" stroke-width="1" stroke-dasharray="2,2"/>
+              <line x1="178" y1="24" x2="178" y2="44" stroke="rgba(28,21,16,0.35)" stroke-width="1" stroke-dasharray="2,2"/>
+              <line x1="236" y1="24" x2="236" y2="44" stroke="rgba(28,21,16,0.35)" stroke-width="1" stroke-dasharray="2,2"/>
+              <circle cx="36" cy="14" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="92" cy="14" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="148" cy="14" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="207" cy="14" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="264" cy="14" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="36" cy="54" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="92" cy="54" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="148" cy="54" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="207" cy="54" r="5" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="264" cy="54" r="5" fill="rgba(200,140,80,0.3)"/>
+            </svg>
+          </div>
+          <p class="sc-desc">Alle fünf Module hintereinander — ein beeindruckender Tisch für Meetings, Präsentationen und Bankette. Bis zu 10+ Personen.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-card" id="sc2">
+      <div class="scenario-header" onclick="toggleSc('sc2')">
+        <div class="sc-left">
+          <span class="sc-num">2</span>
+          <span class="sc-name">Workshop</span>
+        </div>
+        <div class="sc-arrow"><svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 1L8 8L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="scenario-body" id="sc2-body">
+        <div class="sc-inner">
+          <span class="sc-config">2+2 Inseln + 1 separat</span>
+          <div class="sc-diag-wrap">
+            <svg width="100%" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="18" width="95" height="18" rx="2" fill="rgba(200,140,80,0.55)" stroke="rgba(200,140,80,0.7)" stroke-width="1"/>
+              <line x1="55" y1="18" x2="55" y2="36" stroke="rgba(28,21,16,0.3)" stroke-width="1" stroke-dasharray="2,2"/>
+              <circle cx="30" cy="9" r="4" fill="rgba(200,140,80,0.3)"/><circle cx="80" cy="9" r="4" fill="rgba(200,140,80,0.3)"/>
+              <circle cx="30" cy="45" r="4" fill="rgba(200,140,80,0.3)"/><circle cx="80" cy="45" r="4" fill="rgba(200,140,80,0.3)"/>
+
+              <rect x="118" y="18" width="100" height="18" rx="2" fill="rgba(200,140,80,0.45)" stroke="rgba(200,140,80,0.6)" stroke-width="1"/>
+              <line x1="168" y1="18" x2="168" y2="36" stroke="rgba(28,21,16,0.3)" stroke-width="1" stroke-dasharray="2,2"/>
+              <circle cx="143" cy="9" r="4" fill="rgba(200,140,80,0.28)"/><circle cx="193" cy="9" r="4" fill="rgba(200,140,80,0.28)"/>
+              <circle cx="143" cy="45" r="4" fill="rgba(200,140,80,0.28)"/><circle cx="193" cy="45" r="4" fill="rgba(200,140,80,0.28)"/>
+
+              <rect x="234" y="18" width="58" height="18" rx="2" fill="rgba(200,140,80,0.32)" stroke="rgba(200,140,80,0.48)" stroke-width="1"/>
+              <circle cx="263" cy="9" r="4" fill="rgba(200,140,80,0.22)"/>
+              <circle cx="263" cy="45" r="4" fill="rgba(200,140,80,0.22)"/>
+            </svg>
+          </div>
+          <p class="sc-desc">Module werden zu Gruppeninseln. Ideal für Kreativ-Workshops und kollaborative Formate — 3 unabhängige Arbeitsstationen.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="scenario-card" id="sc3">
+      <div class="scenario-header" onclick="toggleSc('sc3')">
+        <div class="sc-left">
+          <span class="sc-num">3</span>
+          <span class="sc-name">Event & Buffet</span>
+        </div>
+        <div class="sc-arrow"><svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 1L8 8L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="scenario-body" id="sc3-body">
+        <div class="sc-inner">
+          <span class="sc-config">Freie Anordnung</span>
+          <div class="sc-diag-wrap">
+            <svg width="100%" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+              <rect x="8" y="8" width="175" height="16" rx="2" fill="rgba(200,140,80,0.55)" stroke="rgba(200,140,80,0.7)" stroke-width="1"/>
+              <line x1="65" y1="8" x2="65" y2="24" stroke="rgba(28,21,16,0.3)" stroke-width="1" stroke-dasharray="2,2"/>
+              <line x1="122" y1="8" x2="122" y2="24" stroke="rgba(28,21,16,0.3)" stroke-width="1" stroke-dasharray="2,2"/>
+              <rect x="200" y="8" width="16" height="82" rx="2" fill="rgba(200,140,80,0.38)" stroke="rgba(200,140,80,0.55)" stroke-width="1"/>
+              <rect x="8" y="50" width="88" height="16" rx="2" fill="rgba(200,140,80,0.32)" stroke="rgba(200,140,80,0.48)" stroke-width="1"/>
+              <line x1="52" y1="50" x2="52" y2="66" stroke="rgba(28,21,16,0.25)" stroke-width="1" stroke-dasharray="2,2"/>
+              <text x="235" y="62" font-family="DM Mono, monospace" font-size="8" fill="rgba(200,140,80,0.4)" text-anchor="middle">Theke</text>
+              <text x="92" y="35" font-family="DM Mono, monospace" font-size="8" fill="rgba(200,140,80,0.35)" text-anchor="middle">Buffet</text>
+            </svg>
+          </div>
+          <p class="sc-desc">Buffet, Theke, Ausstellung — frei im Raum positioniert. Modul D und E als Stehtheke, A–C als Buffetlinie.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATERIAL -->
+<section class="material-section reveal" id="material">
+  <div class="section-head">
+    <div class="tag">Material & Konstruktion</div>
+    <h2 class="section-title">Handwerk,<br><em>das bleibt.</em></h2>
+  </div>
+  <div class="material-cards">
+    <div class="mat-card">
+      <div class="mat-label">Tischplatte</div>
+      <div class="mat-title">Massivholz, gesägt</div>
+      <div class="mat-desc">3–4 cm starke Bohlen aus einem Stamm. Geölt und gewachst — leicht zu pflegen, nachbehandelbar, kein Kunststoff.</div>
+    </div>
+    <div class="mat-card">
+      <div class="mat-label">Gestell</div>
+      <div class="mat-title">Flachstahl, mattiert</div>
+      <div class="mat-desc">Schlichtes Untergestell, schlank und stabil. Jedes Modul steht eigenständig oder verbindet sich bündig.</div>
+    </div>
+    <div class="mat-card">
+      <div class="mat-label">Verbindung</div>
+      <div class="mat-title">Magnetklammern</div>
+      <div class="mat-desc">Unterseits montiert, unsichtbar. Module klicken ohne Werkzeug zusammen — nahtlose Optik, schnelle Handhabung.</div>
+    </div>
+    <div class="mat-card" style="border-color:var(--steel)">
+      <div class="mat-label" style="color:var(--steel)">Optional</div>
+      <div class="mat-title" style="color:var(--steel);font-size:18px">Kabel & Zubehör</div>
+      <div class="mat-desc">Kabelkanal für Strom / USB nachrüstbar. Hocker und Tabletts aus Schnittholzresten — kein Material verschwendet.</div>
+    </div>
+  </div>
+</section>
+
+<!-- VORTEILE -->
+<section class="vorteile-section reveal">
+  <div class="section-head">
+    <div class="tag">Warum dieses System</div>
+    <h2 class="section-title">Das spricht<br><em>dafür.</em></h2>
+  </div>
+  <div class="vorteile-list">
+    <div class="vorteil-row">
+      <div class="vorteil-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="1" y="8" width="18" height="5" rx="1" stroke="var(--oak-mid)" stroke-width="1.4"/>
+          <path d="M5 8V6M10 8V4M15 8V6M5 13V15M10 13V16M15 13V15" stroke="var(--oak-mid)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="vorteil-text">Flexibel für jeden Anlass im Gartensaal</div>
+    </div>
+    <div class="vorteil-row">
+      <div class="vorteil-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2L2 7V10C2 14.4 5.6 17.8 10 19C14.4 17.8 18 14.4 18 10V7L10 2Z" stroke="var(--oak-mid)" stroke-width="1.4" fill="none"/>
+          <path d="M7 10L9 12L13 8" stroke="var(--oak-mid)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="vorteil-text">Kein Werkzeug nötig — einfach zu bedienen</div>
+    </div>
+    <div class="vorteil-row">
+      <div class="vorteil-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 2C7.2 2 4 4.5 4 8.5C4 13 7 15 10 18C13 15 16 13 16 8.5C16 4.5 12.8 2 10 2Z" stroke="var(--oak-mid)" stroke-width="1.4" fill="none"/>
+          <circle cx="10" cy="8.5" r="2.2" stroke="var(--oak-mid)" stroke-width="1.1"/>
+        </svg>
+      </div>
+      <div class="vorteil-text">Natürliche Ästhetik — jede Bohle ein Unikat</div>
+    </div>
+    <div class="vorteil-row">
+      <div class="vorteil-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 14L10 4L17 14H3Z" stroke="var(--oak-mid)" stroke-width="1.4" fill="none" stroke-linejoin="round"/>
+          <path d="M7 14V17M13 14V17" stroke="var(--oak-mid)" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M5 17H15" stroke="var(--oak-mid)" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="vorteil-text">Leicht — einfach zu lagern und zu tragen</div>
+    </div>
+    <div class="vorteil-row">
+      <div class="vorteil-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 3V10L14 8" stroke="var(--oak-mid)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="10" cy="13" r="5" stroke="var(--oak-mid)" stroke-width="1.4" fill="none"/>
+        </svg>
+      </div>
+      <div class="vorteil-text">Nachhaltig — aus einem Stamm, kein Abfall</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section reveal">
+  <span class="cta-tag">Nächster Schritt</span>
+  <h2 class="cta-title">Bereit für<br><em>Modul A?</em></h2>
+  <p class="cta-sub">Ein Brett. Ein Gestell. Den Rest sieht man dann.</p>
+  <div class="cta-steps">
+    <div class="cta-step">
+      <span class="cta-step-n">1</span>
+      <span class="cta-step-text">Ein erstes Modul (z.B. A, 0.9m) bauen und im Gartensaal ausprobieren</span>
+    </div>
+    <div class="cta-step">
+      <span class="cta-step-n">2</span>
+      <span class="cta-step-text">Massanpassungen vornehmen — Breite, Höhe, Gestell</span>
+    </div>
+    <div class="cta-step">
+      <span class="cta-step-n">3</span>
+      <span class="cta-step-text">Die restlichen vier Module nach Bedarf fertigen</span>
+    </div>
+  </div>
+  <a class="cta-btn" href="mailto:">
+    <svg width="14" height="11" viewBox="0 0 14 11" fill="none">
+      <rect x="1" y="1" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+      <path d="M1 3L7 6.5L13 3" stroke="currentColor" stroke-width="1.2"/>
+    </svg>
+    Gespräch beginnen
+  </a>
+  <div class="footer-note">Modulares Tischsystem — Gartensaal · Entwurf 2025</div>
+</section>
+
+<script>
+function toggleSc(id) {
+  const card = document.getElementById(id);
+  const body = document.getElementById(id + '-body');
+  const isOpen = body.classList.contains('open');
+  document.querySelectorAll('.scenario-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); card.classList.add('open'); }
+}
+
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.07 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+toggleSc('sc1');
+</script>
+</body>
+</html>
