@@ -1,0 +1,21 @@
+.catalog-hero {
+  width: min(100% - 2rem, var(--max-width));
+  margin: 4rem auto 2rem;
+}
+.catalog-grid {
+  width: min(100% - 2rem, var(--max-width));
+  margin: 0 auto 4rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+.catalog-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.catalog-card h2 { margin-top: 0; font-size: 1.15rem; }
+.catalog-card p { color: var(--color-muted); min-height: 4.5em; }
+.catalog-card a { color: var(--color-primary); font-weight: 600; text-decoration: none; }
