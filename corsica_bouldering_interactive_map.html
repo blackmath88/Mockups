@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Corsica Bouldering Field Map</title>
+  <style>
+    :root {
+      --ink: #24312f;
+      --ink-soft: #53615c;
+      --sea: #8fb0b5;
+      --sea-deep: #668b94;
+      --paper: #f3ead7;
+      --sand: #d7c39d;
+      --granite: #8b8a7d;
+      --forest: #7c8c66;
+      --accent: #b35b36;
+      --accent-dark: #713a2b;
+      --panel: rgba(252, 247, 234, 0.92);
+      --shadow: 0 24px 70px rgba(28, 43, 42, 0.28);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 12%, rgba(255,255,255,.24), transparent 26rem),
+        linear-gradient(135deg, #6f959d 0%, var(--sea) 42%, #789da3 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image:
+        linear-gradient(0deg, rgba(255,255,255,.23) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.18) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mix-blend-mode: soft-light;
+    }
+
+    .page {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      padding: clamp(20px, 4vw, 56px);
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: .78rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(36,49,47,.7);
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.3rem, 6vw, 5.6rem);
+      line-height: .9;
+      letter-spacing: -.055em;
+      color: #172321;
+      text-wrap: balance;
+    }
+
+    .intro {
+      margin: 14px 0 0;
+      max-width: 760px;
+      color: rgba(31,47,45,.82);
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      line-height: 1.65;
+    }
+
+    .legend-card {
+      justify-self: end;
+      width: min(320px, 100%);
+      padding: 18px 20px;
+      border: 1px solid rgba(36,49,47,.14);
+      border-radius: 22px;
+      background: rgba(243, 234, 215, .68);
+      box-shadow: 0 14px 35px rgba(34, 49, 47, .14);
+      backdrop-filter: blur(8px);
+    }
+
+    .legend-card strong { display: block; margin-bottom: 8px; }
+    .legend-card p { margin: 0; color: var(--ink-soft); line-height: 1.5; font-size: .94rem; }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(320px, 440px);
+      gap: clamp(18px, 3vw, 32px);
+      align-items: stretch;
+    }
+
+    .map-card, .panel {
+      border: 1px solid rgba(36,49,47,.16);
+      border-radius: 32px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    .map-toolbar {
+      padding: 18px 20px 14px;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      border-bottom: 1px solid rgba(36,49,47,.1);
+    }
+
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    button.chip {
+      border: 1px solid rgba(36,49,47,.18);
+      background: rgba(255,255,255,.44);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-weight: 800;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+    }
+
+    button.chip:hover { transform: translateY(-1px); }
+    button.chip.active {
+      background: var(--ink);
+      color: #fff7e8;
+      border-color: var(--ink);
+    }
+
+    .search-wrap { position: relative; min-width: min(100%, 240px); }
+    .search-wrap input {
+      width: 100%;
+      border: 1px solid rgba(36,49,47,.18);
+      border-radius: 999px;
+      padding: 10px 14px 10px 36px;
+      background: rgba(255,255,255,.55);
+      color: var(--ink);
+      outline: none;
+      font-weight: 650;
+    }
+    .search-wrap span { position: absolute; left: 13px; top: 9px; opacity: .55; }
+
+    .svg-wrap {
+      position: relative;
+      padding: clamp(10px, 2vw, 22px);
+      background:
+        radial-gradient(circle at 72% 24%, rgba(255,255,255,.16), transparent 18rem),
+        linear-gradient(180deg, rgba(112,150,157,.32), rgba(93,128,136,.2));
+    }
+
+    svg { display: block; width: 100%; height: auto; }
+
+    .map-label {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      fill: rgba(31,47,45,.52);
+      paint-order: stroke;
+      stroke: rgba(243,234,215,.72);
+      stroke-width: 5;
+    }
+
+    .coast-shadow { fill: #5b6b5f; opacity: .22; filter: url(#softShadow); }
+    .island-base { fill: url(#islandGradient); stroke: none; filter: url(#paperWarp); }
+    .coast-wide { fill: none; stroke: rgba(243,234,215,.72); stroke-width: 9; stroke-linejoin: round; stroke-linecap: round; }
+    .coast-ink { fill: none; stroke: #465349; stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; opacity: .86; }
+    .coast-sketch { fill: none; stroke: rgba(113,58,43,.42); stroke-width: 1.05; stroke-dasharray: 4 8; stroke-linecap: round; opacity: .78; }
+
+    .contour {
+      fill: none;
+      stroke: rgba(68,84,76,.27);
+      stroke-width: 1;
+      stroke-linecap: round;
+      stroke-dasharray: 2 7;
+    }
+
+    .ridge {
+      fill: none;
+      stroke: rgba(255,248,225,.26);
+      stroke-width: 8;
+      stroke-linecap: round;
+      filter: blur(.2px);
+    }
+
+    .marker { cursor: pointer; transition: opacity .18s ease; }
+    .marker.dim { opacity: .18; pointer-events: none; }
+    .marker .halo { fill: rgba(179,91,54,.2); stroke: rgba(255,247,232,.78); stroke-width: 2; transform-origin: center; transition: r .18s ease, fill .18s ease; }
+    .marker .pin { fill: var(--accent); stroke: #fff7e8; stroke-width: 2.8; filter: url(#pinShadow); transition: transform .18s ease, fill .18s ease; transform-origin: center; }
+    .marker.seaside .pin { fill: #b35b36; }
+    .marker.inland .pin { fill: #6f7f4d; }
+    .marker.mountain .pin { fill: #526f80; }
+    .marker.active .halo, .marker:hover .halo { r: 17; fill: rgba(179,91,54,.34); }
+    .marker.active .pin, .marker:hover .pin { transform: scale(1.12); fill: #d06c3f; }
+
+    .marker-label {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(7px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .marker:hover .marker-label, .marker.active .marker-label { opacity: 1; transform: translateY(0); }
+    .marker-label rect { fill: rgba(36,49,47,.88); rx: 10; }
+    .marker-label text { fill: #fff7e8; font-size: 14px; font-weight: 850; }
+
+    .scale-note {
+      position: absolute;
+      left: clamp(22px, 4vw, 42px);
+      bottom: clamp(18px, 3vw, 34px);
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(36,49,47,.72);
+      color: #fff7e8;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .panel { display: flex; flex-direction: column; min-height: 610px; }
+    .panel-hero {
+      padding: 26px 28px;
+      background:
+        linear-gradient(135deg, rgba(36,49,47,.96), rgba(64,82,71,.9)),
+        radial-gradient(circle at 90% 0%, rgba(179,91,54,.5), transparent 18rem);
+      color: #fff7e8;
+    }
+    .panel-hero .tag { margin: 0 0 12px; font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; opacity: .72; font-weight: 850; }
+    .panel-hero h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.1rem, 4vw, 3.4rem); line-height: .95; letter-spacing: -.035em; }
+    .panel-hero p { margin: 14px 0 0; color: rgba(255,247,232,.8); line-height: 1.55; }
+
+    .panel-body { padding: 22px 28px 26px; overflow: auto; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .meta {
+      border: 1px solid rgba(36,49,47,.12);
+      border-radius: 18px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,.42);
+    }
+    .meta span { display: block; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); font-weight: 850; margin-bottom: 4px; }
+    .meta strong { font-size: .96rem; }
+
+    .panel-section { margin: 22px 0; }
+    .panel-section h3 { margin: 0 0 8px; font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-dark); }
+    .panel-section p { margin: 0; color: var(--ink-soft); line-height: 1.6; }
+
+    .resource-list { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 9px; }
+    .resource-list a {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 13px;
+      border: 1px solid rgba(36,49,47,.12);
+      border-radius: 16px;
+      background: rgba(255,255,255,.45);
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .resource-list a:hover { background: rgba(255,255,255,.72); }
+    .resource-list a::after { content: "↗"; color: var(--accent-dark); }
+
+    footer {
+      margin-top: 24px;
+      color: rgba(31,47,45,.78);
+      font-size: .9rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      header, .app-shell { grid-template-columns: 1fr; }
+      .legend-card { justify-self: start; }
+      .panel { min-height: auto; }
+    }
+
+    @media (max-width: 620px) {
+      .page { padding: 16px; }
+      .map-card, .panel { border-radius: 24px; }
+      .map-toolbar { align-items: stretch; }
+      .search-wrap { width: 100%; }
+      .meta-grid { grid-template-columns: 1fr; }
+      .panel-hero, .panel-body { padding-left: 20px; padding-right: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <p class="eyebrow">Granite blocs · sea caves · high valleys</p>
+        <h1>Corsica bouldering field map</h1>
+        <p class="intro">A stylized planning map for Corsica’s main bouldering zones, from marine granite at Spanu and Capineru to the Corte/Corti mountain river valleys and older inland circuits.</p>
+      </div>
+      <aside class="legend-card" aria-label="Map notes">
+        <strong>Approximate planning layer</strong>
+        <p>Markers use latitude/longitude projected into the same SVG space as the island outline. Click any point for climbing-guide notes and links.</p>
+      </aside>
+    </header>
+
+    <section class="app-shell">
+      <div class="map-card">
+        <div class="map-toolbar">
+          <div class="chips" role="group" aria-label="Filter bouldering areas">
+            <button class="chip active" type="button" data-filter="all">All</button>
+            <button class="chip" type="button" data-filter="seaside">Seaside</button>
+            <button class="chip" type="button" data-filter="inland">Inland / forest</button>
+            <button class="chip" type="button" data-filter="mountain">Mountain / riverside</button>
+          </div>
+          <label class="search-wrap">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Search an area" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="svg-wrap">
+          <svg id="mapSvg" viewBox="0 0 760 1060" role="img" aria-labelledby="mapTitle mapDesc">
+            <title id="mapTitle">Corsica bouldering map</title>
+            <desc id="mapDesc">SVG map of Corsica generated from inline GeoJSON with interactive bouldering area markers.</desc>
+            <defs>
+              <filter id="paperWarp" x="-8%" y="-8%" width="116%" height="116%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.013" numOctaves="3" seed="9" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" />
+              </filter>
+              <filter id="softShadow" x="-35%" y="-35%" width="170%" height="170%">
+                <feDropShadow dx="0" dy="16" stdDeviation="16" flood-color="#26322d" flood-opacity="0.35" />
+              </filter>
+              <filter id="pinShadow" x="-60%" y="-60%" width="220%" height="220%">
+                <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#1e2624" flood-opacity="0.35" />
+              </filter>
+              <filter id="paperTexture" x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="3" />
+                <feColorMatrix type="saturate" values="0" />
+                <feComponentTransfer>
+                  <feFuncA type="table" tableValues="0 0.08" />
+                </feComponentTransfer>
+              </filter>
+              <linearGradient id="islandGradient" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#d8c598" />
+                <stop offset=".48" stop-color="#9a9b84" />
+                <stop offset="1" stop-color="#6f8060" />
+              </linearGradient>
+            </defs>
+            <rect width="760" height="1060" rx="26" fill="#8fb0b5" />
+            <rect width="760" height="1060" rx="26" filter="url(#paperTexture)" opacity=".75" />
+            <g id="mapLayer"></g>
+            <g id="markerLayer"></g>
+            <text x="66" y="92" class="map-label">Mer Méditerranée</text>
+            <text x="506" y="1000" class="map-label">Bouches de Bonifacio</text>
+          </svg>
+          <div class="scale-note">GeoJSON coastline · approximate markers</div>
+        </div>
+      </div>
+
+      <aside class="panel" id="infoPanel" aria-live="polite"></aside>
+    </section>
+
+    <footer>
+      Main areas based on Corsica Escalade and related bouldering guidebook resources. Marker positions are approximate and intended for planning, not navigation.
+    </footer>
+  </main>
+
+  <script>
+    // Inline GeoJSON source for Corse. The production pipeline supports any Polygon/MultiPolygon;
+    // this simplified MultiPolygon follows the supplied france-geojson region feature structure and
+    // keeps the browser file self-contained while preserving real lon/lat projection semantics.
+    const corsicaGeojson = {
+      "type": "Feature",
+      "properties": { "code": "94", "nom": "Corse" },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [[[
+          [9.40875,43.02232],[9.43078,43.01134],[9.44355,42.99091],[9.45636,42.95752],[9.47792,42.91444],
+          [9.51664,42.88166],[9.53054,42.84276],[9.54898,42.80751],[9.54512,42.75961],[9.56058,42.71736],
+          [9.54835,42.67262],[9.54285,42.62618],[9.53395,42.58519],[9.52601,42.54424],[9.50321,42.50769],
+          [9.48925,42.46972],[9.48726,42.43038],[9.46844,42.38429],[9.45091,42.34316],[9.43042,42.30968],
+          [9.42072,42.27371],[9.40615,42.23214],[9.40424,42.19328],[9.41086,42.15473],[9.40829,42.12051],
+          [9.39677,42.08668],[9.38509,42.04397],[9.37122,42.00869],[9.34793,41.97555],[9.31779,41.94324],
+          [9.29336,41.91265],[9.27039,41.87941],[9.25079,41.84268],[9.23264,41.80688],[9.21578,41.76969],
+          [9.20107,41.73278],[9.18814,41.69195],[9.17191,41.65076],[9.14327,41.61727],[9.10677,41.58968],
+          [9.05901,41.56657],[9.00463,41.55234],[8.95131,41.54395],[8.90624,41.53354],[8.87001,41.50874],
+          [8.83683,41.47714],[8.80105,41.43748],[8.77266,41.39992],[8.73349,41.38165],[8.69018,41.38875],
+          [8.66654,41.42104],[8.65371,41.46624],[8.63988,41.50941],[8.61883,41.54917],[8.59264,41.58842],
+          [8.57007,41.63267],[8.55346,41.68294],[8.54286,41.73149],[8.52028,41.77406],[8.49495,41.81698],
+          [8.51507,41.86169],[8.54889,41.88637],[8.57697,41.91891],[8.59726,41.95446],[8.61437,41.99551],
+          [8.63272,42.03893],[8.63419,42.08185],[8.62762,42.12571],[8.60608,42.16497],[8.58136,42.19992],
+          [8.56936,42.23817],[8.56984,42.27604],[8.57978,42.31527],[8.57339,42.35557],[8.55595,42.39102],
+          [8.53324,42.42621],[8.52079,42.46651],[8.51838,42.50858],[8.53685,42.54618],[8.56203,42.57951],
+          [8.59044,42.61194],[8.61266,42.64682],[8.61739,42.68485],[8.60959,42.72413],[8.59493,42.76022],
+          [8.59383,42.79888],[8.60818,42.83676],[8.63836,42.86653],[8.67477,42.88704],[8.71377,42.90853],
+          [8.75323,42.93564],[8.78126,42.96732],[8.81218,42.99643],[8.85437,43.01173],[8.89903,43.01689],
+          [8.94383,43.02137],[8.98584,43.03506],[9.02946,43.05182],[9.07651,43.05584],[9.12395,43.05012],
+          [9.16998,43.04637],[9.21708,43.04718],[9.26374,43.04891],[9.30778,43.04479],[9.35398,43.03536],
+          [9.40875,43.02232]
+        ]],[[
+          [8.55371,42.67558],[8.56859,42.67181],[8.58094,42.66182],[8.58186,42.64833],[8.56928,42.63952],
+          [8.55031,42.64048],[8.53857,42.65215],[8.53901,42.66658],[8.55371,42.67558]
+        ]],[[
+          [9.39469,43.00551],[9.40826,42.99819],[9.40941,42.98574],[9.39678,42.98166],[9.38442,42.98911],
+          [9.38267,43.00068],[9.39469,43.00551]
+        ]]]
+      }
+    };
+
+    const areas = [
+      {
+        id: "punta-di-spanu",
+        name: "Punta di Spanu",
+        filter: "seaside",
+        type: "Seaside granite",
+        region: "Near Calvi / Lumio · northwest coast",
+        lat: 42.601,
+        lon: 8.771,
+        description: "Wind-cut marine granite, sculpted blocs and an unmistakable seaside setting on the Calvi side of the island.",
+        why: "One of Corsica’s main marine sites. Seashore bouldering is beautiful and often less mossy, but the crystals can be abrasive and sea proximity may make rock feel greasy.",
+        resources: [
+          ["Corsica Escalade", "https://www.corsica-escalade.com/"],
+          ["Pyrenean Troubadour — Corsica", "https://www.pyrenean-troubadour.com/"],
+          ["Google Maps search", "https://www.google.com/maps/search/?api=1&query=Punta%20di%20Spanu%20Corsica"]
+        ]
+      },
+      {
+        id: "capineru",
+        name: "Capineru",
+        filter: "seaside",
+        type: "Seaside granite",
+        region: "Near Pianottoli-Caldarello / Bonifacio · far south",
+        lat: 41.481,
+        lon: 8.906,
+        description: "Southern coastal granite around the Bonifacio approaches, with compact blocs and a strong Mediterranean atmosphere.",
+        why: "Together with Punta di Spanu, Capineru is one of the two headline marine areas for Corsican bouldering and appears in Julien Torre / Pyrenean Troubadour material.",
+        resources: [
+          ["Corsica Escalade", "https://www.corsica-escalade.com/"],
+          ["Pyrenean Troubadour", "https://www.pyrenean-troubadour.com/"],
+          ["OpenStreetMap search", "https://www.openstreetmap.org/search?query=Capineru%20Corsica"]
+        ]
+      },
+      {
+        id: "campomoro",
+        name: "Campomoro",
+        filter: "seaside",
+        type: "Seashore bouldering",
+        region: "Southwest coast",
+        lat: 41.633,
+        lon: 8.807,
+        description: "Referenced southwest-coast seashore blocs near the tower and beaches of Campomoro.",
+        why: "Useful as a photo-reference example of the island’s aesthetic marine bouldering: sculpted stone, open sea, and quick-changing conditions.",
+        resources: [
+          ["Corsica Escalade", "https://www.corsica-escalade.com/"],
+          ["Google Maps search", "https://www.google.com/maps/search/?api=1&query=Campomoro%20Corsica%20bouldering"]
+        ]
+      },
+      {
+        id: "saint-antoine",
+        name: "Saint-Antoine",
+        filter: "inland",
+        type: "Local granite boulders",
+        region: "Near Ajaccio",
+        lat: 41.942,
+        lon: 8.742,
+        description: "A local Ajaccio-side granite venue, handy when the western coast is the focus of a trip.",
+        why: "Presented among Corsican problems by Julien Torre / Pyrenean Troubadour and a useful reminder that bouldering is distributed beyond the famous coastal venues.",
+        resources: [
+          ["Pyrenean Troubadour", "https://www.pyrenean-troubadour.com/"],
+          ["Google Maps search", "https://www.google.com/maps/search/?api=1&query=Saint-Antoine%20Ajaccio%20Corsica"]
+        ]
+      },
+      {
+        id: "restonica",
+        name: "Restonica Valley",
+        filter: "mountain",
+        type: "Mountain valley",
+        region: "Southwest of Corte / Corti",
+        lat: 42.248,
+        lon: 9.079,
+        description: "High-valley granite in the Corte/Corti mountains, with colder air, river scenery and a distinctly alpine feel.",
+        why: "The Corte/Corti region is the best-provided inland bouldering region, and Restonica is one of its classic valley references.",
+        resources: [
+          ["Corsica Escalade", "https://www.corsica-escalade.com/"],
+          ["Pyrenean Troubadour", "https://www.pyrenean-troubadour.com/"],
+          ["OpenStreetMap search", "https://www.openstreetmap.org/search?query=Restonica%20Valley%20Corsica"]
+        ]
+      },
+      {
+        id: "vecchio",
+        name: "Vecchio",
+        filter: "mountain",
+        type: "Riverside / developing",
+        region: "Near Venaco / Corte",
+        lat: 42.233,
+        lon: 9.182,
+        description: "River-polished granite blocs in the central mountains, currently the island’s most active major development zone.",
+        why: "Les Blocs du Vecchio is a dedicated digital guidebook: currently French, English planned, in progress, aiming for 500+ problems across 170 boulders by summer 2026; the Central Sector currently has around 160 problems.",
+        resources: [
+          ["Les Blocs du Vecchio", "https://lesblocsduvecchio.com/"],
+          ["Pyrenean Troubadour", "https://www.pyrenean-troubadour.com/"],
+          ["Google Maps search", "https://www.google.com/maps/search/?api=1&query=Vecchio%20Venaco%20Corsica"]
+        ]
+      },
+      {
+        id: "valdu-di-saltu",
+        name: "Valdu di Saltu",
+        filter: "inland",
+        type: "Inland / historic area",
+        region: "Taravo Valley",
+        lat: 41.783,
+        lon: 8.956,
+        description: "Historic inland circuit in the Taravo valley, away from the main tourist coast and central Corte concentration.",
+        why: "Around 300 problems have been documented, but the area is now little visited and moss or lichens have returned in many places.",
+        resources: [
+          ["Corsica Escalade", "https://www.corsica-escalade.com/"],
+          ["OpenStreetMap search", "https://www.openstreetmap.org/search?query=Valdu%20di%20Saltu%20Corsica"]
+        ]
+      }
+    ];
+
+    const svg = document.getElementById("mapSvg");
+    const mapLayer = document.getElementById("mapLayer");
+    const markerLayer = document.getElementById("markerLayer");
+    const panel = document.getElementById("infoPanel");
+    const searchInput = document.getElementById("searchInput");
+    const chips = Array.from(document.querySelectorAll(".chip"));
+    const width = 760;
+    const height = 1060;
+    const padding = { top: 96, right: 154, bottom: 96, left: 154 };
+    let activeFilter = "all";
+    let activeAreaId = areas[0].id;
+
+    function flattenCoordinates(geometry) {
+      const points = [];
+      const visit = (coords) => {
+        if (typeof coords[0] === "number") points.push(coords);
+        else coords.forEach(visit);
+      };
+      visit(geometry.coordinates);
+      return points;
+    }
+
+    function createProjection(feature) {
+      const pts = flattenCoordinates(feature.geometry);
+      const lons = pts.map(([lon]) => lon);
+      const lats = pts.map(([, lat]) => lat);
+      const minLon = Math.min(...lons);
+      const maxLon = Math.max(...lons);
+      const minLat = Math.min(...lats);
+      const maxLat = Math.max(...lats);
+      const availableW = width - padding.left - padding.right;
+      const availableH = height - padding.top - padding.bottom;
+      const lonSpan = maxLon - minLon;
+      const latSpan = maxLat - minLat;
+
+      // Equirectangular fit: one scale is shared by X and Y so Corsica keeps its
+      // geographic proportions instead of being independently stretched to the viewBox.
+      const scale = Math.min(availableW / lonSpan, availableH / latSpan);
+      const usedW = lonSpan * scale;
+      const usedH = latSpan * scale;
+      const offsetX = padding.left + (availableW - usedW) / 2;
+      const offsetY = padding.top + (availableH - usedH) / 2;
+
+      return ([lon, lat]) => [
+        offsetX + (lon - minLon) * scale,
+        offsetY + (maxLat - lat) * scale
+      ];
+    }
+
+    const project = createProjection(corsicaGeojson);
+
+    function ringToPath(ring) {
+      return ring.map((coord, index) => {
+        const [x, y] = project(coord);
+        return `${index === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
+      }).join(" ") + " Z";
+    }
+
+    function geometryToPath(geometry) {
+      if (geometry.type === "Polygon") return geometry.coordinates.map(ringToPath).join(" ");
+      if (geometry.type === "MultiPolygon") return geometry.coordinates.flatMap(poly => poly.map(ringToPath)).join(" ");
+      return "";
+    }
+
+    function addPath(className, transform = "") {
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", geometryToPath(corsicaGeojson.geometry));
+      path.setAttribute("class", className);
+      if (transform) path.setAttribute("transform", transform);
+      mapLayer.appendChild(path);
+      return path;
+    }
+
+    function drawMap() {
+      addPath("coast-shadow", "translate(10 14)");
+      addPath("coast-wide");
+      addPath("island-base");
+      addPath("coast-ink");
+      addPath("coast-sketch", "translate(-2 1)");
+      addPath("coast-sketch", "translate(3 -2)");
+
+      const contourData = [
+        "M322 214 C368 285 398 360 390 438 C382 514 342 560 350 640 C356 708 396 770 418 846",
+        "M286 270 C322 330 335 392 318 456 C300 520 268 578 280 648 C292 720 340 772 356 834",
+        "M438 248 C420 324 444 392 430 466 C416 540 442 605 418 688 C396 764 386 810 404 886",
+        "M250 430 C300 408 348 406 390 430 C430 452 456 492 500 502",
+        "M236 612 C286 594 342 592 394 612 C438 628 478 660 508 708"
+      ];
+      contourData.forEach((d, index) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", d);
+        path.setAttribute("class", index < 3 ? "contour" : "ridge");
+        mapLayer.appendChild(path);
+      });
+    }
+
+    function markerLabel(name) {
+      const labelWidth = Math.max(112, name.length * 8.2 + 28);
+      return `
+        <g class="marker-label" transform="translate(${-labelWidth / 2} -48)">
+          <rect width="${labelWidth}" height="30" x="0" y="0"></rect>
+          <text x="${labelWidth / 2}" y="20" text-anchor="middle">${name}</text>
+        </g>`;
+    }
+
+    function drawMarkers() {
+      markerLayer.innerHTML = "";
+      areas.forEach(area => {
+        const [x, y] = project([area.lon, area.lat]);
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("class", `marker ${area.filter}`);
+        group.setAttribute("data-id", area.id);
+        group.setAttribute("tabindex", "0");
+        group.setAttribute("role", "button");
+        group.setAttribute("aria-label", `Open ${area.name}`);
+        group.setAttribute("transform", `translate(${x.toFixed(2)} ${y.toFixed(2)})`);
+        group.innerHTML = `
+          <circle class="halo" r="12"></circle>
+          <circle class="pin" r="7.4"></circle>
+          <path d="M0,11 L-5,24 L0,20 L5,24 Z" fill="#fff7e8" opacity=".9"></path>
+          ${markerLabel(area.name)}
+        `;
+        group.addEventListener("click", () => selectArea(area.id));
+        group.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectArea(area.id);
+          }
+        });
+        markerLayer.appendChild(group);
+      });
+    }
+
+    function resourceList(resources) {
+      return resources.map(([label, href]) => `<li><a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a></li>`).join("");
+    }
+
+    function renderPanel(area) {
+      panel.innerHTML = `
+        <div class="panel-hero">
+          <p class="tag">${area.type}</p>
+          <h2>${area.name}</h2>
+          <p>${area.description}</p>
+        </div>
+        <div class="panel-body">
+          <div class="meta-grid">
+            <div class="meta"><span>Region</span><strong>${area.region}</strong></div>
+            <div class="meta"><span>Coordinates</span><strong>${area.lat.toFixed(3)}, ${area.lon.toFixed(3)}</strong></div>
+          </div>
+          <div class="panel-section">
+            <h3>Why it matters</h3>
+            <p>${area.why}</p>
+          </div>
+          <div class="panel-section">
+            <h3>Resources</h3>
+            <ul class="resource-list">${resourceList(area.resources)}</ul>
+          </div>
+          <div class="panel-section">
+            <h3>Field note</h3>
+            <p>Corsica has bouldering across seaside, forest and high mountains. Treat this as a trip-planning poster: verify access, season, landowner guidance and current guidebook updates before visiting.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function selectArea(id) {
+      activeAreaId = id;
+      const area = areas.find(item => item.id === id) || areas[0];
+      renderPanel(area);
+      updateMarkerState();
+    }
+
+    function visibleFor(area) {
+      const matchesFilter = activeFilter === "all" || area.filter === activeFilter;
+      const query = searchInput.value.trim().toLowerCase();
+      const haystack = `${area.name} ${area.region} ${area.type}`.toLowerCase();
+      return matchesFilter && haystack.includes(query);
+    }
+
+    function updateMarkerState() {
+      areas.forEach(area => {
+        const node = markerLayer.querySelector(`[data-id="${area.id}"]`);
+        if (!node) return;
+        node.classList.toggle("dim", !visibleFor(area));
+        node.classList.toggle("active", area.id === activeAreaId);
+      });
+    }
+
+    chips.forEach(chip => {
+      chip.addEventListener("click", () => {
+        activeFilter = chip.dataset.filter;
+        chips.forEach(item => item.classList.toggle("active", item === chip));
+        const firstVisible = areas.find(visibleFor);
+        if (firstVisible && !visibleFor(areas.find(area => area.id === activeAreaId))) {
+          activeAreaId = firstVisible.id;
+          renderPanel(firstVisible);
+        }
+        updateMarkerState();
+      });
+    });
+
+    searchInput.addEventListener("input", () => {
+      const firstVisible = areas.find(visibleFor);
+      if (firstVisible && !visibleFor(areas.find(area => area.id === activeAreaId))) {
+        activeAreaId = firstVisible.id;
+        renderPanel(firstVisible);
+      }
+      updateMarkerState();
+    });
+
+    drawMap();
+    drawMarkers();
+    selectArea(activeAreaId);
+  </script>
+</body>
+</html>
